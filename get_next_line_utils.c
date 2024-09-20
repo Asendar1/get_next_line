@@ -12,94 +12,80 @@
 
 #include "get_next_line.h"
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+char	*ft_strdup(char *s1)
 {
-	size_t	i;
-	size_t	j;
-	char	*str;
+	char			*dest;
+	unsigned int	i;
 
-	str = (char *)malloc(sizeof(*s) * (len + 1));
-	if (!str)
+	dest = (char *)malloc(ft_strlen(s1) + 1);
+	if (!dest)
 		return (NULL);
 	i = 0;
-	j = 0;
-	while (s[i])
+	while (s1[i])
 	{
-		if (i >= start && j < len)
-		{
-			str[j] = s[i];
-			j++;
-		}
+		dest[i] = s1[i];
 		i++;
 	}
-	str[j] = 0;
-	return (str);
+	dest[i] = 0;
+	return (dest);
 }
 
-int	ft_strlen(const char *str)
+size_t	ft_strlen(char *s)
 {
 	int	i;
 
 	i = 0;
-	while (str[i])
+	while (s[i])
 		i++;
 	return (i);
 }
 
-char	*ft_strchr(const char *s, int i)
+char	*ft_substr(char *s, unsigned int start, size_t len)
 {
-	while (*s)
-	{
-		if (*s == i)
-			return ((char *)s);
-		s++;
-	}
-	if (i == '\0')
-		return ((char *)s);
-	return (0);
-}
-
-char	*ft_strdup(const char *s)
-{
-	int		i;
-	int		j;
+	size_t	i;
 	char	*str;
 
-	i = 0;
-	j = ft_strlen(s);
-	str = (char *)malloc(sizeof(*str) * (j + 1));
+	if (!s)
+		return (NULL);
+	if (start > ft_strlen(s))
+		return (malloc(1));
+	if (len > ft_strlen(s + start))
+		len = ft_strlen(s + start);
+	str = malloc((len + 1) * sizeof(char));
 	if (!str)
 		return (NULL);
-	while (i < j)
+	i = 0;
+	while (i < len)
 	{
-		str[i] = s[i];
+		str[i] = s[start + i];
 		i++;
 	}
-	str[i] = '\0';
+	str[i] = 0;
 	return (str);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
-	int		i;
-	int		j;
-	char	*str;
+	char	*res;
+
+	res = (char *)malloc((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
+	if (!res)
+		return (NULL);
+	fill_str(res, s1, s2);
+	return (res);
+}
+
+void	fill_str(char *res, char *s1, char *s2)
+{
+	unsigned int	i;
+	unsigned int	j;
 
 	i = 0;
 	j = 0;
-	str = (char *)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
-	if (!str)
-		return (NULL);
-	while (s1[i] != '\0')
-	{
-		str[i] = s1[i];
-		i++;
-	}
-	while (s2[j] != '\0')
-	{
-		str[i + j] = s2[j];
-		j++;
-	}
-	str[i + j] = '\0';
-	return (str);
+	while (s1[j])
+		res[i++] = s1[j++];
+	j = 0;
+	while (s2[j])
+		res[i++] = s2[j++];
+	res[i] = '\0';
 }
