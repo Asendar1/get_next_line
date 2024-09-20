@@ -109,6 +109,7 @@ static char	*ft_strchr(char *s, int c)
 	return (NULL);
 }
 
+// #include <stdio.h>
 // int	main(void)
 // {
 // 	int fd = open("black.txt", O_RDONLY);
