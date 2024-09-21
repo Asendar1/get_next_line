@@ -12,34 +12,22 @@
 
 #include "get_next_line.h"
 
-static char	*_fill_line_buffer(int fd, char *left_c, char *buffer);
-static char	*_set_line(char *line);
-static char	*ft_strchr(char *s, int c);
-
-char	*get_next_line(int fd)
+static char	*ft_strchr(char *s, int c)
 {
-	static char	*left_c;
-	char		*line;
-	char		*buffer;
+	unsigned int	i;
+	char			cc;
 
-	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	cc = (char)c;
+	i = 0;
+	while (s[i])
 	{
-		free(left_c);
-		free(buffer);
-		left_c = NULL;
-		buffer = NULL;
-		return (NULL);
+		if (s[i] == cc)
+			return ((char *)&s[i]);
+		i++;
 	}
-	if (!buffer)
-		return (NULL);
-	line = _fill_line_buffer(fd, left_c, buffer);
-	free(buffer);
-	buffer = NULL;
-	if (!line)
-		return (NULL);
-	left_c = _set_line(line);
-	return (line);
+	if (s[i] == cc)
+		return ((char *)&s[i]);
+	return (NULL);
 }
 
 static char	*_set_line(char *line_buffer)
@@ -91,41 +79,57 @@ static char	*_fill_line_buffer(int fd, char *left_c, char *buffer)
 	return (left_c);
 }
 
-static char	*ft_strchr(char *s, int c)
+char	*get_next_line(int fd)
 {
-	unsigned int	i;
-	char			cc;
+	static char	*left_c[1024];
+	char		*line;
+	char		*buffer;
 
-	cc = (char)c;
-	i = 0;
-	while (s[i])
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 	{
-		if (s[i] == cc)
-			return ((char *)&s[i]);
-		i++;
+		free(left_c[fd]);
+		free(buffer);
+		left_c[fd] = NULL;
+		buffer = NULL;
+		return (NULL);
 	}
-	if (s[i] == cc)
-		return ((char *)&s[i]);
-	return (NULL);
+	if (!buffer)
+		return (NULL);
+	line = _fill_line_buffer(fd, left_c[fd], buffer);
+	free(buffer);
+	buffer = NULL;
+	if (!line)
+		return (NULL);
+	left_c[fd] = _set_line(line);
+	return (line);
 }
 
-// #include <stdio.h>
-// int	main(void)
-// {
-// 	int fd = open("black.txt", O_RDONLY);
-// 	char *line;
+#include <stdio.h>
+int	main(void)
+{
+	int fd = open("black.txt", O_RDONLY);
+	char *line;
 
-// 	while ((line = get_next_line(fd)) != NULL)
-// 	{
-// 			printf("\nThe printed line: %s\n", line);
-// 			free(line);
-// 	}
-// 	// line = get_next_line(fd);
-// 	// printf("\nThe printed line: %s\n", line);
-// 	// free(line);
-// 	// char *line2 = get_next_line(fd);
-// 	// printf("\nThe printed line2: %s\n", line2);
-// 	// free(line2);
-// 	close(fd);
-// 	return (0);
-// }
+	while ((line = get_next_line(fd)) != NULL)
+	{
+			printf("\nThe printed line: %s\n", line);
+			free(line);
+	}
+
+	int fd4 = open("white.txt", O_RDONLY);
+	char *line2;
+	while ((line2 = get_next_line(fd4)) != NULL)
+	{
+			printf("\nThe printed line: %s\n", line2);
+			free(line);
+	}
+	// line = get_next_line(fd);
+	// printf("\nThe printed line: %s\n", line);
+	// free(line);
+	// char *line2 = get_next_line(fd);
+	// printf("\nThe printed line2: %s\n", line2);
+	// free(line2);
+	close(fd);
+	return (0);
+}
