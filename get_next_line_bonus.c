@@ -69,26 +69,23 @@ static char	*_fill_line_buffer(int fd, char *left_c, char *buffer)
 
 char	*get_next_line(int fd)
 {
-	static char	*left_c[MAX_FD];
+	static char	*left_c[1024];
 	char		*line;
 	char		*buffer;
 
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL); // Immediately return for invalid fd or buffer size
 	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (fd < 0 || BUFFER_SIZE <= 0 || (read (fd, 0, 0) < 0))
-	{
-		// free(left_c[fd]);
-		free(buffer);
-		left_c[fd] = NULL;
-		buffer = NULL;
-		return (0);
-	}
 	if (!buffer)
 		return (NULL);
 	line = _fill_line_buffer(fd, left_c[fd], buffer);
-	free(buffer);
-	buffer = NULL;
+	free(buffer); // Free buffer after use
 	if (!line)
+	{
+		// If line is NULL, it means there was an error
+		left_c[fd] = NULL; // Reset left_c for future calls
 		return (NULL);
+	}
 	left_c[fd] = _set_line(line);
 	return (line);
 }

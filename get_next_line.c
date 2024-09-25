@@ -26,7 +26,7 @@ static char	*_set_line(char *line_buffer)
 	i = 0;
 	while (line_buffer[i] != '\n' && line_buffer[i] != '\0')
 		i++;
-	if (line_buffer[i] == 0 || line_buffer[1] == 0)
+	if (line_buffer[i] == 0)
 		return (NULL);
 	left_c = ft_substr(line_buffer, i + 1, ft_strlen(line_buffer) - i);
 	if (*left_c == 0)
@@ -73,26 +73,19 @@ char	*get_next_line(int fd)
 	char		*line;
 	char		*buffer;
 
-	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (fd < 0 || BUFFER_SIZE <= 0)
-	{
-		free(left_c);
-		free(buffer);
-		left_c = NULL;
-		buffer = NULL;
-		return (NULL);
-	}
+		return (NULL); // Immediately return for invalid fd or buffer size
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (!buffer)
 		return (NULL);
 	line = _fill_line_buffer(fd, left_c, buffer);
+	free(buffer); // Free buffer after use
 	if (!line)
 	{
-		free (buffer);
-		buffer = NULL;
-		return NULL;
+		// If line is NULL, it means there was an error
+		left_c = NULL; // Reset left_c for future calls
+		return (NULL);
 	}
-	free(buffer);
-	buffer = NULL;
 	left_c = _set_line(line);
 	return (line);
 }
