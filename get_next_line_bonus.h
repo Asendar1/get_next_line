@@ -1,21 +1,25 @@
-/*
- * The MAX_FD macro is defined based on the max number of file descriptors
- * based on my current OS and what I found online (MacOS Ventura 13.0)
- * (this information is particularly hard to find, or I just don't know 
- * what to search for on Google)
- */
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hassende <hassende@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/25 11:12:57 by hassende          #+#    #+#             */
+/*   Updated: 2024/09/25 11:15:22 by hassende         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef GET_NEXT_LINE_BONUS_H
 # define GET_NEXT_LINE_BONUS_H
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 15
 # endif
-# define MAX_FD 10240
 # include <fcntl.h>
 # include <stdlib.h>
 # include <unistd.h>
 
 char	*get_next_line(int fd);
-
 char	*ft_strdup(char *s);
 size_t	ft_strlen(char *s);
 char	*ft_substr(char *s, unsigned int start, size_t len);

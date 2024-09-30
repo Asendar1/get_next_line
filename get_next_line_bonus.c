@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hassende <hassende@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/25 11:12:52 by hassende          #+#    #+#             */
+/*   Updated: 2024/09/25 11:49:53 by hassende         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line_bonus.h"
 
 static char	*ft_strchr(char *s, int c)
@@ -18,7 +30,7 @@ static char	*ft_strchr(char *s, int c)
 	return (NULL);
 }
 
-static char	*_set_line(char *line_buffer)
+static char	*set_line(char *line_buffer)
 {
 	char	*left_c;
 	ssize_t	i;
@@ -27,18 +39,18 @@ static char	*_set_line(char *line_buffer)
 	while (line_buffer[i] != '\n' && line_buffer[i] != '\0')
 		i++;
 	if (line_buffer[i] == 0 || line_buffer[1] == 0)
-		return (0);
+		return (NULL);
 	left_c = ft_substr(line_buffer, i + 1, ft_strlen(line_buffer) - i);
 	if (*left_c == 0)
 	{
 		free(left_c);
 		left_c = NULL;
 	}
-	line_buffer[i + 1] = 0;
+	line_buffer[i + 1] = '\0';
 	return (left_c);
 }
 
-static char	*_fill_line_buffer(int fd, char *left_c, char *buffer)
+static char	*fill_line_buffer(int fd, char *left_c, char *buffer)
 {
 	ssize_t	b_read;
 	char	*tmp;
@@ -50,11 +62,11 @@ static char	*_fill_line_buffer(int fd, char *left_c, char *buffer)
 		if (b_read == -1)
 		{
 			free(left_c);
-			return (0);
+			return (NULL);
 		}
 		else if (b_read == 0)
 			break ;
-		buffer[b_read] = 0;
+		buffer[b_read] = '\0';
 		if (!left_c)
 			left_c = ft_strdup("");
 		tmp = left_c;
@@ -74,18 +86,39 @@ char	*get_next_line(int fd)
 	char		*buffer;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL); // Immediately return for invalid fd or buffer size
-	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+		return (NULL);
+	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	line = _fill_line_buffer(fd, left_c[fd], buffer);
-	free(buffer); // Free buffer after use
+	line = fill_line_buffer(fd, left_c[fd], buffer);
+	free(buffer);
 	if (!line)
 	{
-		// If line is NULL, it means there was an error
-		left_c[fd] = NULL; // Reset left_c for future calls
+		left_c[fd] = NULL;
 		return (NULL);
 	}
-	left_c[fd] = _set_line(line);
+	left_c[fd] = set_line(line);
 	return (line);
 }
+
+/*#include <stdio.h>
+int main ()
+{
+	int fd = open("black.txt", O_RDONLY);
+	int fd2 = open("white.txt", O_RDONLY);
+	char *line;
+	while ((line = get_next_line(fd)) != NULL)
+	{
+		printf("%s", line);
+		free(line);
+		while ((line = get_next_line(fd2)) != NULL)
+		{
+			printf("%s", line);
+			free(line);
+		}
+	}
+	close (fd);
+	close (fd2);
+
+	return (0);
+}*/
