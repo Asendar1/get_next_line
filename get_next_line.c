@@ -1,119 +1,83 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hassende <hassende@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/25 11:13:07 by hassende          #+#    #+#             */
-/*   Updated: 2024/09/25 11:55:29 by hassende         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
+#define MAX_FD 1024
+#define MAX_LEFT_SIZE 4096  // Adjust this value as needed
 
-static char	*ft_strchr(char *s, int c)
+static char	*set_line(char *line_buffer, char (*left_c)[MAX_LEFT_SIZE])
 {
-	unsigned int	i;
-	char			cc;
-
-	cc = (char)c;
-	i = 0;
-	while (s[i])
-	{
-		if (s[i] == cc)
-			return ((char *)&s[i]);
-		i++;
-	}
-	if (s[i] == cc)
-		return ((char *)&s[i]);
-	return (NULL);
-}
-
-static char	*set_line(char *line_buffer)
-{
-	char	*rem;
-	ssize_t	i;
+	size_t	i;
+	char	*result;
 
 	i = 0;
 	while (line_buffer[i] != '\n' && line_buffer[i] != '\0')
 		i++;
-	if (line_buffer[i] == '\0')
-		return (NULL);
-	rem = ft_substr(line_buffer, i + 1, ft_strlen(line_buffer) - i);
-	if (*rem == 0)
-	{
-		free(rem);
-		rem = NULL;
-	}
-	line_buffer[i + 1] = '\0';
-	return (rem);
+	if (line_buffer[i] == '\n')
+		i++;
+	result = ft_substr(line_buffer, 0, i);
+	ft_strlcpy(*left_c, &line_buffer[i], MAX_LEFT_SIZE);
+	free(line_buffer);  // Free the original line_buffer
+	return (result);
 }
 
-static char	*fill_line_buffer(int fd, char *rem, char *buffer)
+static char	*fill_line_buffer(int fd, char (*left_c)[MAX_LEFT_SIZE], char *buffer)
 {
 	ssize_t	b_read;
+	char	*line;
 	char	*tmp;
 
+	line = ft_strdup(*left_c);
+	(*left_c)[0] = '\0';  // Clear the left_c after using it
 	b_read = 1;
 	while (b_read > 0)
 	{
 		b_read = read(fd, buffer, BUFFER_SIZE);
-		if (b_read < 0)
+		if (b_read == -1)
 		{
-			free(rem);
+			free(line);
 			return (NULL);
 		}
-		else if (b_read == 0)
-			break ;
 		buffer[b_read] = '\0';
-		if (!rem)
-			rem = ft_strdup("");
-		tmp = rem;
-		rem = ft_strjoin(tmp, buffer);
+		tmp = line;
+		line = ft_strjoin(tmp, buffer);
 		free(tmp);
-		tmp = NULL;
-		if (ft_strchr(buffer, '\n'))
+		if (ft_strchr(buffer, '\n') || b_read == 0)
 			break ;
 	}
-	return (rem);
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*rem;
+	static char	left_c[MAX_FD][MAX_LEFT_SIZE];
 	char		*line;
 	char		*buffer;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || fd >= MAX_FD || BUFFER_SIZE <= 0)
 		return (NULL);
-	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	line = fill_line_buffer(fd, rem, buffer);
+	line = fill_line_buffer(fd, &left_c[fd], buffer);
 	free(buffer);
-	if (!line)
+	if (!line || *line == '\0')
 	{
-		rem = NULL;
+		free(line);
 		return (NULL);
 	}
-	rem = set_line(line);
-	return (line);
+	return (set_line(line, &left_c[fd]));
 }
 
 /*#include <stdio.h>
 int main ()
 {
-	int fd = open("black.txt", O_RDONLY);
-	int fd2 = open("white.txt", O_RDONLY);
 	char *line;
+	int fd = open ("black.txt", O_RDONLY);
+
 	while ((line = get_next_line(fd)) != NULL)
 	{
 		printf("%s", line);
 		free(line);
 	}
-	close (fd);
-	close (fd2);
 
-	return (0);
+	close(fd);
+	return(0);
 }*/
