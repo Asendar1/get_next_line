@@ -1,6 +1,16 @@
 #include "get_next_line.h"
-#define MAX_FD 1024
-#define MAX_LEFT_SIZE 4096  // Adjust this value as needed
+#define MAX_FD 16
+#define MAX_LEFT_SIZE 4096
+
+size_t	ft_strlen(const char *s)
+{
+	size_t	i;
+
+	i = 0;
+	while (s[i])
+		i++;
+	return (i);
+}
 
 static char	*set_line(char *line_buffer, char (*left_c)[MAX_LEFT_SIZE])
 {
@@ -14,18 +24,19 @@ static char	*set_line(char *line_buffer, char (*left_c)[MAX_LEFT_SIZE])
 		i++;
 	result = ft_substr(line_buffer, 0, i);
 	ft_strlcpy(*left_c, &line_buffer[i], MAX_LEFT_SIZE);
-	free(line_buffer);  // Free the original line_buffer
+	free(line_buffer);
 	return (result);
 }
 
-static char	*fill_line_buffer(int fd, char (*left_c)[MAX_LEFT_SIZE], char *buffer)
+static char	*fill_line_buffer(int fd, char (*left_c)[MAX_LEFT_SIZE],
+		char *buffer)
 {
 	ssize_t	b_read;
 	char	*line;
 	char	*tmp;
 
 	line = ft_strdup(*left_c);
-	(*left_c)[0] = '\0';  // Clear the left_c after using it
+	(*left_c)[0] = '\0';
 	b_read = 1;
 	while (b_read > 0)
 	{
